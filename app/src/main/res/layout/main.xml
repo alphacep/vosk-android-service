@@ -4,6 +4,13 @@
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:padding="16dp">
+
+    <Button
+        android:id="@+id/navigate_model_lists"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/navigate_model_list"/>
+
     <Button
         android:id="@+id/recognize_file"
         android:layout_width="match_parent"

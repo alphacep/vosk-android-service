@@ -1,0 +1,14 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/release
+/captures
+/app/ontest*
+/app/production*
+/app/develop*
+/app/google-services.json
+/app/build
+.externalNativeBuild
+hs_err_*

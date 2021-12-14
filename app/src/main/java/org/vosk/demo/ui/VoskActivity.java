@@ -12,16 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.vosk.demo;
+package org.vosk.demo.ui;
+
+import static org.vosk.demo.DownloadModelService.MODEL_FILE_ROOT_PATH;
+import static org.vosk.demo.api.Download.RESTARTING;
+import static org.vosk.demo.utils.Error.CONNECTION;
+import static org.vosk.demo.utils.Tools.isServiceRunning;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork;
 
 import org.vosk.LibVosk;
 import org.vosk.LogLevel;
@@ -31,13 +52,22 @@ import org.vosk.android.RecognitionListener;
 import org.vosk.android.SpeechService;
 import org.vosk.android.SpeechStreamService;
 import org.vosk.android.StorageService;
+import org.vosk.demo.DownloadModelService;
+import org.vosk.demo.R;
+import org.vosk.demo.ui.model_list.ModelListActivity;
+import org.vosk.demo.utils.Error;
+import org.vosk.demo.utils.EventBus;
+import org.vosk.demo.utils.PreferenceConstants;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class VoskActivity extends Activity implements
         RecognitionListener {
@@ -48,8 +78,11 @@ public class VoskActivity extends Activity implements
     static private final int STATE_FILE = 3;
     static private final int STATE_MIC = 4;
 
-    /* Used to handle permission request */
-    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+    public static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+    public static final int PERMISSIONS_REQUEST_ALL_FILES_ACCESS = 2;
+
+    private CompositeDisposable compositeDisposable;
+    private SharedPreferences sharedPreferences;
 
     private Model model;
     private SpeechService speechService;
@@ -61,32 +94,100 @@ public class VoskActivity extends Activity implements
         super.onCreate(state);
         setContentView(R.layout.main);
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // Setup layout
         resultView = findViewById(R.id.result_text);
         setUiState(STATE_START);
 
+        findViewById(R.id.navigate_model_lists).setOnClickListener(view -> {
+            int storagePermissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+            if (storagePermissionCheck != PackageManager.PERMISSION_GRANTED)
+                navigateToModelList();
+            else
+                requestAllFilesAccessPermission();
+        });
         findViewById(R.id.recognize_file).setOnClickListener(view -> recognizeFile());
         findViewById(R.id.recognize_mic).setOnClickListener(view -> recognizeMicrophone());
         ((ToggleButton) findViewById(R.id.pause)).setOnCheckedChangeListener((view, isChecked) -> pause(isChecked));
 
         LibVosk.setLogLevel(LogLevel.INFO);
+    }
 
-        // Check if user has given permission to record audio, init the model after permission is granted
-        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
-        } else {
-            initModel();
+    private void observeEvents() {
+        compositeDisposable.add(EventBus.getInstance().getConnectionEvent().subscribe(state -> {
+                    if (state == NetworkInfo.State.CONNECTED) {
+                        checkIfIsDownloading();
+                    }
+                })
+        );
+
+        compositeDisposable.add(
+                EventBus.getInstance().geErrorObservable()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::handleError)
+        );
+
+        compositeDisposable.add(ReactiveNetwork.observeNetworkConnectivity(getApplicationContext())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(connectivity -> {
+                    if (connectivity.getState() == NetworkInfo.State.CONNECTED || connectivity.getState() == NetworkInfo.State.DISCONNECTED)
+                        EventBus.getInstance().postConnectionEvent(connectivity.getState());
+                })
+        );
+    }
+
+    private void handleError(Error error) {
+        switch (error) {
+            case CONNECTION:
+                Toast.makeText(this, getString(R.string.connection_error), Toast.LENGTH_LONG).show();
+                break;
+            case WRITE_STORAGE:
+                Toast.makeText(this, getString(R.string.write_storage_error), Toast.LENGTH_LONG).show();
+                break;
         }
     }
 
+    private void checkIfIsDownloading() {
+        String modelDownloadingName = sharedPreferences.getString(PreferenceConstants.DOWNLOADING_FILE, "");
+        if (!modelDownloadingName.equals("") && !isServiceRunning(this)) {
+            ModelListActivity.progress = RESTARTING;
+            startDownloadModelService();
+        }
+    }
+
+    private void startDownloadModelService() {
+        if (!isServiceRunning(this)) {
+            Intent service = new Intent(this, DownloadModelService.class);
+            ContextCompat.startForegroundService(this, service);
+        }
+    }
+
+    private void navigateToModelList() {
+        Intent intent = new Intent(this, ModelListActivity.class);
+        startActivity(intent);
+    }
+
+
     private void initModel() {
-        StorageService.unpack(this, "model-en-us", "model",
-                (model) -> {
-                    this.model = model;
-                    setUiState(STATE_READY);
-                },
-                (exception) -> setErrorState("Failed to unpack the model" + exception.getMessage()));
+
+        if (sharedPreferences.contains(PreferenceConstants.ACTIVE_MODEL)) {
+            File outputFile = new File(MODEL_FILE_ROOT_PATH, sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, "") + "/" + sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, ""));
+
+            compositeDisposable.add(Single.fromCallable(() -> new Model(outputFile.getAbsolutePath()))
+                    .doOnSuccess(model1 -> this.model = model1)
+                    .delay(1, TimeUnit.MILLISECONDS)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(model1 -> setUiState(STATE_READY), Throwable::printStackTrace));
+        } else
+            StorageService.unpack(this, "model-en-us", "model",
+                    (model) -> {
+                        this.model = model;
+                        setUiState(STATE_READY);
+                    },
+                    (exception) -> setErrorState("Failed to unpack the model" + exception.getMessage()));
     }
 
 
@@ -101,7 +202,15 @@ public class VoskActivity extends Activity implements
                 // so we execute it in async task
                 initModel();
             } else {
+                Toast.makeText(this, getString(R.string.mic_permission_error), Toast.LENGTH_SHORT).show();
                 finish();
+            }
+        }
+        if (requestCode == PERMISSIONS_REQUEST_ALL_FILES_ACCESS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                navigateToModelList();
+            } else {
+                Toast.makeText(this, getString(R.string.file_access_permission_error), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -118,6 +227,7 @@ public class VoskActivity extends Activity implements
         if (speechStreamService != null) {
             speechStreamService.stop();
         }
+        compositeDisposable.clear();
     }
 
     @Override
@@ -221,6 +331,30 @@ public class VoskActivity extends Activity implements
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        compositeDisposable = new CompositeDisposable();
+        observeEvents();
+        setUiState(STATE_START);
+        checkPermissions();
+    }
+
+    private void checkPermissions() {
+        int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+        } else {
+            initModel();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        compositeDisposable.clear();
+    }
+
     private void recognizeMicrophone() {
         if (speechService != null) {
             setUiState(STATE_DONE);
@@ -245,4 +379,32 @@ public class VoskActivity extends Activity implements
         }
     }
 
+    private void requestAllFilesAccessPermission() {
+        // Check if user has given all files access permission to record audio, init model after permission is granted
+        if (Build.VERSION.SDK_INT >= 30) {
+            Log.i(VoskActivity.class.getName(), "API level >= 30");
+            if (!Environment.isExternalStorageManager()) {
+                // Request permission
+                try {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    startActivityForResult(intent, PERMISSIONS_REQUEST_ALL_FILES_ACCESS);
+                } catch (android.content.ActivityNotFoundException e) {
+                    setErrorState("Failed to request all files access permission");
+                }
+            } else {
+                navigateToModelList();
+            }
+        } else {
+            Log.i(VoskActivity.class.getName(), "API level < 30");
+            // Request permission
+            int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_ALL_FILES_ACCESS);
+            } else {
+                navigateToModelList();
+            }
+        }
+    }
 }

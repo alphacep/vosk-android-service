@@ -14,5 +14,21 @@
     <string name="stop_file">Stop File</string>
     <string name="pause">Pause</string>
     <string name="continueRecognition">Continue</string>
+    <string name="recognized">Recognized: %1$s</string>
+    <string name="speaknow">Start speaking now!</string>
+    <string name="loading">Loading…</string>
+    <string name="wait_for_download">Another download is in progress. Please wait.</string>
+    <string name="warning">Warning</string>
+    <string name="navigate_model_list">Model List</string>
+    <string name="download_complete">Download Success</string>
+    <string name="model_download_start">Starting download…</string>
+    <string name="download_model_service_notification_title">Downloading vosk languaje model</string>
+    <string name="connection_error">Connection error, please check your network</string>
+    <string name="mic_permission_error">You must accept this permission to use the app</string>
+    <string name="file_access_permission_error">You must accept this permission to access model list</string>
+    <string name="model_download_unzipping">Extracting…</string>
+    <string name="model_download_restart">Restarting…</string>
+    <string name="download_indicator">download_indicator</string>
+    <string name="write_storage_error">Storage write error, please contact support.</string>
 
 </resources>
