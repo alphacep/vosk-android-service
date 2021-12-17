@@ -3,6 +3,7 @@ package org.vosk.demo.ui.model_list;
 import static org.vosk.demo.api.Download.CLEAR;
 import static org.vosk.demo.api.Download.COMPLETE;
 import static org.vosk.demo.api.Download.RESTARTING;
+import static org.vosk.demo.api.Download.STARTING;
 import static org.vosk.demo.api.VoskClient.ServiceType.DOWNLOAD_MODEL_LIST;
 import static org.vosk.demo.utils.Tools.isServiceRunning;
 
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork;
 import com.google.gson.Gson;
@@ -76,7 +78,7 @@ public class ModelListActivity extends AppCompatActivity {
 
     private void checkIfIsDownloading() {
         modelDownloadingName = sharedPreferences.getString(PreferenceConstants.DOWNLOADING_FILE, "");
-        if (!modelDownloadingName.equals("") && !isServiceRunning(this)) {
+        if (isOnline && !modelDownloadingName.equals("") && !isServiceRunning(this)) {
             progress = RESTARTING;
             startDownloadModelService();
         }
@@ -88,6 +90,8 @@ public class ModelListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.model_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(modelListAdapter);
+        if (recyclerView.getItemAnimator() != null)
+            ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
     }
 
     private void loadModels() {
@@ -97,11 +101,11 @@ public class ModelListActivity extends AppCompatActivity {
                 .subscribe(
                         newDataset -> {
                             showList();
-                            modelListAdapter.updateDataset(newDataset.stream().filter(it -> it.getType().equals("small") && !it.getObsolete()).collect(Collectors.toList()));
+                            modelListAdapter.updateDataset(newDataset.stream().filter(it -> it.getType().equals("small") && !it.getObsolete()).collect(Collectors.toList()), offlineModels.stream().filter(it -> !it.getName().equals(modelDownloadingName)).collect(Collectors.toList()));
                         },
                         error -> {
                             showList();
-                            modelListAdapter.updateDataset(offlineModels);
+                            modelListAdapter.updateDataset(offlineModels.stream().filter(it -> !it.getName().equals(modelDownloadingName)).collect(Collectors.toList()));
                         }));
     }
 
@@ -126,7 +130,10 @@ public class ModelListActivity extends AppCompatActivity {
                         Toast.makeText(this, R.string.download_complete, Toast.LENGTH_SHORT).show();
                         loadOfflineModels();
                         progress = CLEAR;
-                        modelListAdapter.notifyDataSetChanged();
+                        sharedPreferences.edit()
+                                .remove(PreferenceConstants.DOWNLOADING_FILE)
+                                .apply();
+                        modelListAdapter.updateOfflineModels(offlineModels);
                     } else if (progress != download.getProgress()) {
                         progress = download.getProgress();
                         if (modelDownloadingName != null && modelListAdapter.getDataset().stream().anyMatch(it -> it.getName().equals(modelDownloadingName)))
@@ -138,10 +145,12 @@ public class ModelListActivity extends AppCompatActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(modelItem -> {
+                    progress = STARTING;
                     //start service
                     startDownloadModelService();
                     modelDownloadingName = modelItem.getName();
                     sharedPreferences.edit().putString(PreferenceConstants.DOWNLOADING_FILE, modelItem.getName()).apply();
+                    addOfflineModel(modelItem);
                 }));
 
         compositeDisposable.add(eventBus.getModelSelectedObservable()
@@ -172,6 +181,16 @@ public class ModelListActivity extends AppCompatActivity {
                         EventBus.getInstance().postConnectionEvent(connectivity.getState());
                 })
         );
+    }
+
+    private void addOfflineModel(ModelItem modelItem) {
+        String offlineListJson = sharedPreferences.getString(PreferenceConstants.OFFLINE_LIST, "[]");
+        Gson gson = new Gson();
+        List<ModelItem> offlineModels = gson.fromJson(offlineListJson, new TypeToken<List<ModelItem>>() {
+        }.getType());
+        offlineModels.add(modelItem);
+        String offlineModelsJson = gson.toJson(offlineModels);
+        sharedPreferences.edit().putString(PreferenceConstants.OFFLINE_LIST, offlineModelsJson).apply();
     }
 
     private void handleError(Error error) {

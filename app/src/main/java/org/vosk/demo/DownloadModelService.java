@@ -97,7 +97,6 @@ public class DownloadModelService extends Service {
                         ZipHelper.unzipFIle(outputFile, destinationFile);
                         actualProgress = CLEAR;
                     } else if (download.getProgress() == COMPLETE) {
-                        addOfflineModel();
                         sharedPreferences.edit()
                                 .remove(PreferenceConstants.DOWNLOADING_FILE)
                                 .apply();
@@ -117,16 +116,6 @@ public class DownloadModelService extends Service {
     private void updateNotificationProgress() {
         notificationBuilder.setProgress(DOWNLOAD_MODEL_MAX_PROGRESS, actualProgress, false);
         notificationManager.notify(DOWNLOAD_MODEL_NOTIFICATION_ID, notificationBuilder.build());
-    }
-
-    private void addOfflineModel() {
-        String offlineListJson = sharedPreferences.getString(PreferenceConstants.OFFLINE_LIST, "[]");
-        Gson gson = new Gson();
-        List<ModelItem> offlineModels = gson.fromJson(offlineListJson, new TypeToken<List<ModelItem>>() {
-        }.getType());
-        offlineModels.add(new ModelItem(modelName));
-        String offlineModelsJson = gson.toJson(offlineModels);
-        sharedPreferences.edit().putString(PreferenceConstants.OFFLINE_LIST, offlineModelsJson).apply();
     }
 
     private DownloadProgressListener getListener() {

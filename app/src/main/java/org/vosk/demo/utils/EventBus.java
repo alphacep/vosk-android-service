@@ -11,11 +11,12 @@ import io.reactivex.subjects.PublishSubject;
 public class EventBus {
     private static EventBus _instance;
 
-    private PublishSubject<Download> downloadModelProgressEventSubject = PublishSubject.create();
-    private PublishSubject<ModelItem> startDownloadEventSubject = PublishSubject.create();
-    private PublishSubject<ModelItem> modelSelectedEventSubject = PublishSubject.create();
-    private PublishSubject<Error> errorEventSubject = PublishSubject.create();
-    private PublishSubject<NetworkInfo.State> connectionEventSubject = PublishSubject.create();
+    private final PublishSubject<Download> downloadModelProgressEventSubject = PublishSubject.create();
+    private final PublishSubject<ModelItem> startDownloadEventSubject = PublishSubject.create();
+    private final PublishSubject<ModelItem> modelSelectedEventSubject = PublishSubject.create();
+    private final PublishSubject<Error> errorEventSubject = PublishSubject.create();
+    private final PublishSubject<NetworkInfo.State> connectionEventSubject = PublishSubject.create();
+    private final PublishSubject<ModelItem> deleteDownloadedModel = PublishSubject.create();
 
     public EventBus() {
     }
@@ -66,5 +67,13 @@ public class EventBus {
 
     public Observable<NetworkInfo.State> getConnectionEvent() {
         return connectionEventSubject;
+    }
+
+    public Observable<ModelItem> getDeleteDownloadedModelObservable() {
+        return deleteDownloadedModel;
+    }
+
+    public void postDeleteDownloadedModel(ModelItem modelItem) {
+        deleteDownloadedModel.onNext(modelItem);
     }
 }

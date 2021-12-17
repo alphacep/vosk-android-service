@@ -30,5 +30,8 @@
     <string name="model_download_restart">Restarting…</string>
     <string name="download_indicator">download_indicator</string>
     <string name="write_storage_error">Storage write error, please contact support.</string>
+    <string name="model_size">"Size: %1$s"</string>
+    <string name="model_downloading_progress">"%1$d%%"</string>
+    <string name="model_name">"Name: %1$s"</string>
 
 </resources>
