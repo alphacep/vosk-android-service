@@ -113,9 +113,11 @@ public class ModelListAdapter extends ListAdapter<ModelItem, ModelListAdapter.Vi
             itemView.setOnClickListener(sendSelectedEvent);
             modelIndicator.setOnClickListener(sendSelectedEvent);
             itemView.setOnLongClickListener(v -> {
-                if (modelListState == ModelListState.DOWNLOADED)
+                if (modelListState == ModelListState.DOWNLOADED) {
                     EventBus.getInstance().postDeleteDownloadedModel(getCurrentList().get(getAdapterPosition()));
-                return true;
+                    return true;
+                }
+                return false;
             });
 
             switch (modelListState) {

@@ -1,7 +1,10 @@
 package org.vosk.demo.utils;
 
+import static org.vosk.demo.DownloadModelService.MODEL_FILE_ROOT_PATH;
 import static org.vosk.demo.api.Download.CLEAR;
 import static org.vosk.demo.api.Download.COMPLETE;
+
+import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.io.IOUtils;
 
 import org.vosk.demo.api.Download;
 import org.vosk.demo.ui.model_list.ModelListActivity;
@@ -17,10 +20,11 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class ZipHelper {
+public class FileHelper {
 
     public static void unzipFIle(File zipFilePath, File unzipAtLocation) {
 
+        //noinspection ResultOfMethodCallIgnored
         unzipAtLocation.mkdir();
 
         try (ZipFile zipfile = new ZipFile(zipFilePath)) {
@@ -29,6 +33,7 @@ public class ZipHelper {
                 unzipEntry(zipfile, entry, unzipAtLocation);
             }
             EventBus.getInstance().postDownloadStatus(new Download(COMPLETE));
+            FileHelper.deleteFileOrDirectory(new File(MODEL_FILE_ROOT_PATH, unzipAtLocation.getName() + ".zip"));
         } catch (IOException e) {
             ModelListActivity.progress = CLEAR;
             EventBus.getInstance().postErrorStatus(Error.CONNECTION);
@@ -43,7 +48,7 @@ public class ZipHelper {
         }
 
         File outputFile = new File(outputDir, entry.getName());
-        if (!outputFile.getParentFile().exists()) {
+        if (outputFile.getParentFile() != null && !outputFile.getParentFile().exists()) {
             createDir(outputFile.getParentFile());
         }
 
@@ -52,7 +57,7 @@ public class ZipHelper {
         InputStream zin = zipfile.getInputStream(entry);
 
         try (BufferedInputStream input = new BufferedInputStream(zin);
-             BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputFile));) {
+             BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputFile))) {
             copy(input, output);
         } catch (IOException e) {
             throw new IOException(message, e);
@@ -63,18 +68,36 @@ public class ZipHelper {
         if (dir.exists()) {
             return;
         }
-        boolean folderCreated = dir.mkdir();
+        //noinspection ResultOfMethodCallIgnored
+        dir.mkdir();
     }
 
-    private static void copy(InputStream input, OutputStream output) throws IOException {
-        byte data[] = new byte[10240];
+    public static void copy(InputStream input, OutputStream output) throws IOException {
+        byte[] data = new byte[10240];
         int count;
 
-        int total = 0;
         while ((count = input.read(data)) != -1) {
             output.write(data, 0, count);
-            total += count;
         }
         output.flush();
+    }
+
+    public static void writeFile(InputStream inputStream, File file) {
+        try (OutputStream outputStream = new FileOutputStream(file)) {
+            IOUtils.copy(inputStream, outputStream);
+        } catch (IOException e) {
+            EventBus.getInstance().postErrorStatus(Error.WRITE_STORAGE);
+        }
+    }
+
+    public static void deleteFileOrDirectory(File fileOrDirectory) {
+
+        if (fileOrDirectory.isDirectory()) {
+            for (File child : fileOrDirectory.listFiles()) {
+                deleteFileOrDirectory(child);
+            }
+        }
+
+        fileOrDirectory.delete();
     }
 }
