@@ -1,8 +1,6 @@
-package org.vosk.demo.ui.model_list;
+package org.vosk.service.ui.model_list;
 
-import static org.vosk.demo.api.Download.COMPLETE;
-import static org.vosk.demo.api.Download.UNZIPPING;
-import static org.vosk.demo.ui.model_list.ModelListActivity.progress;
+import static org.vosk.service.ui.model_list.ModelListActivity.progress;
 
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -16,14 +14,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.Group;
-import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.vosk.demo.R;
-import org.vosk.demo.api.Download;
-import org.vosk.demo.utils.EventBus;
-import org.vosk.demo.utils.PreferenceConstants;
+import org.vosk.service.R;
+import org.vosk.service.download.EventBus;
+import org.vosk.service.utils.PreferenceConstants;
 
 import java.util.ArrayList;
 import java.util.List;

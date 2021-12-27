@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.vosk.demo.ui;
+package org.vosk.service.ui;
 
-import static org.vosk.demo.DownloadModelService.MODEL_FILE_ROOT_PATH;
-import static org.vosk.demo.api.Download.RESTARTING;
-import static org.vosk.demo.utils.Error.CONNECTION;
-import static org.vosk.demo.utils.Tools.isServiceRunning;
+import static org.vosk.service.download.DownloadModelService.MODEL_FILE_ROOT_PATH;
+import static org.vosk.service.download.Download.RESTARTING;
+import static org.vosk.service.utils.Tools.isServiceRunning;
 
 import android.Manifest;
 import android.app.Activity;
@@ -52,12 +51,12 @@ import org.vosk.android.RecognitionListener;
 import org.vosk.android.SpeechService;
 import org.vosk.android.SpeechStreamService;
 import org.vosk.android.StorageService;
-import org.vosk.demo.DownloadModelService;
-import org.vosk.demo.R;
-import org.vosk.demo.ui.model_list.ModelListActivity;
-import org.vosk.demo.utils.Error;
-import org.vosk.demo.utils.EventBus;
-import org.vosk.demo.utils.PreferenceConstants;
+import org.vosk.service.download.DownloadModelService;
+import org.vosk.service.R;
+import org.vosk.service.ui.model_list.ModelListActivity;
+import org.vosk.service.download.Error;
+import org.vosk.service.download.EventBus;
+import org.vosk.service.utils.PreferenceConstants;
 
 import java.io.File;
 import java.io.IOException;

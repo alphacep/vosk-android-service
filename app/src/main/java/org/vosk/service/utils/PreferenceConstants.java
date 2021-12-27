@@ -1,4 +1,4 @@
-package org.vosk.demo.utils;
+package org.vosk.service.utils;
 
 public class PreferenceConstants {
     public static final String DOWNLOADING_FILE = "downloading_file";

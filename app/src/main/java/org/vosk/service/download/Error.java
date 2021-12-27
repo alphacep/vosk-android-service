@@ -1,4 +1,4 @@
-package org.vosk.demo.utils;
+package org.vosk.service.download;
 
 public enum Error {
     CONNECTION,

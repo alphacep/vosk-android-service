@@ -1,4 +1,4 @@
-package org.vosk.demo.api;
+package org.vosk.service.download;
 
 import java.io.IOException;
 

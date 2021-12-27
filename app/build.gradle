@@ -46,5 +46,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.8.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation 'com.github.pwittchen:reactivenetwork-rx2:0.12.3'
-    compile group: 'commons-io', name: 'commons-io', version: '2.0.1'
+    implementation 'commons-io:commons-io:2.11.0'
 }

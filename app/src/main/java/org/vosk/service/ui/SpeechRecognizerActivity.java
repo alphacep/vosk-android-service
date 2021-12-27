@@ -13,9 +13,9 @@
 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-package org.vosk.demo.ui;
+package org.vosk.service.ui;
 
-import static org.vosk.demo.DownloadModelService.MODEL_FILE_ROOT_PATH;
+import static org.vosk.service.download.DownloadModelService.MODEL_FILE_ROOT_PATH;
 
 import android.Manifest;
 import android.app.Activity;
@@ -47,8 +47,8 @@ import org.vosk.Recognizer;
 import org.vosk.android.RecognitionListener;
 import org.vosk.android.SpeechService;
 import org.vosk.android.StorageService;
-import org.vosk.demo.R;
-import org.vosk.demo.utils.PreferenceConstants;
+import org.vosk.service.R;
+import org.vosk.service.utils.PreferenceConstants;
 
 import java.io.File;
 import java.io.IOException;

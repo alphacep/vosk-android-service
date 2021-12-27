@@ -1,9 +1,9 @@
-package org.vosk.demo.utils;
+package org.vosk.service.utils;
 
 import android.app.ActivityManager;
 import android.content.Context;
 
-import org.vosk.demo.DownloadModelService;
+import org.vosk.service.download.DownloadModelService;
 
 public class Tools {
 

@@ -1,10 +1,10 @@
-package org.vosk.demo;
+package org.vosk.service.download;
 
-import static org.vosk.demo.api.Download.CLEAR;
-import static org.vosk.demo.api.Download.COMPLETE;
-import static org.vosk.demo.api.Download.UNZIPPING;
-import static org.vosk.demo.api.VoskClient.ServiceType.DOWNLOAD_MODEL;
-import static org.vosk.demo.utils.FileHelper.writeFile;
+import static org.vosk.service.download.Download.CLEAR;
+import static org.vosk.service.download.Download.COMPLETE;
+import static org.vosk.service.download.Download.UNZIPPING;
+import static org.vosk.service.download.VoskClient.ServiceType.DOWNLOAD_MODEL;
+import static org.vosk.service.download.FileHelper.writeFile;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -25,15 +25,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import org.vosk.demo.api.Download;
-import org.vosk.demo.api.DownloadProgressListener;
-import org.vosk.demo.api.VoskClient;
-import org.vosk.demo.api.VoskService;
-import org.vosk.demo.ui.model_list.ModelListActivity;
-import org.vosk.demo.utils.Error;
-import org.vosk.demo.utils.EventBus;
-import org.vosk.demo.utils.PreferenceConstants;
-import org.vosk.demo.utils.FileHelper;
+import org.vosk.service.R;
+import org.vosk.service.ui.model_list.ModelListActivity;
+import org.vosk.service.utils.PreferenceConstants;
 
 import java.io.File;
 

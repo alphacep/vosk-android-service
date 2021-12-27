@@ -1,12 +1,12 @@
-package org.vosk.demo.ui.model_list;
+package org.vosk.service.ui.model_list;
 
-import static org.vosk.demo.DownloadModelService.MODEL_FILE_ROOT_PATH;
-import static org.vosk.demo.api.Download.CLEAR;
-import static org.vosk.demo.api.Download.COMPLETE;
-import static org.vosk.demo.api.Download.RESTARTING;
-import static org.vosk.demo.api.Download.STARTING;
-import static org.vosk.demo.api.VoskClient.ServiceType.DOWNLOAD_MODEL_LIST;
-import static org.vosk.demo.utils.Tools.isServiceRunning;
+import static org.vosk.service.download.DownloadModelService.MODEL_FILE_ROOT_PATH;
+import static org.vosk.service.download.Download.CLEAR;
+import static org.vosk.service.download.Download.COMPLETE;
+import static org.vosk.service.download.Download.RESTARTING;
+import static org.vosk.service.download.Download.STARTING;
+import static org.vosk.service.download.VoskClient.ServiceType.DOWNLOAD_MODEL_LIST;
+import static org.vosk.service.utils.Tools.isServiceRunning;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -30,14 +30,14 @@ import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.vosk.demo.DownloadModelService;
-import org.vosk.demo.R;
-import org.vosk.demo.api.VoskClient;
-import org.vosk.demo.api.VoskService;
-import org.vosk.demo.utils.Error;
-import org.vosk.demo.utils.EventBus;
-import org.vosk.demo.utils.PreferenceConstants;
-import org.vosk.demo.utils.FileHelper;
+import org.vosk.service.download.DownloadModelService;
+import org.vosk.service.R;
+import org.vosk.service.download.VoskClient;
+import org.vosk.service.download.VoskService;
+import org.vosk.service.download.Error;
+import org.vosk.service.download.EventBus;
+import org.vosk.service.utils.PreferenceConstants;
+import org.vosk.service.download.FileHelper;
 
 import java.io.File;
 import java.util.List;

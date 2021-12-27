@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.vosk.demo">
+    package="org.vosk.service">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -20,7 +20,7 @@
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true">
         <activity
-            android:name=".ui.model_list.ModelListActivity"
+            android:name="org.vosk.service.ui.model_list.ModelListActivity"
             android:exported="true"
             android:theme="@style/AppTheme">
             <intent-filter>
@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.SpeechRecognizerActivity"
+            android:name="org.vosk.service.ui.SpeechRecognizerActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Vosk.Translucent">
@@ -93,12 +93,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.VoskActivity"
+            android:name="org.vosk.service.ui.VoskActivity"
             android:exported="true"
             android:label="@string/app_name" />
 
         <service
-            android:name=".DownloadModelService"
+            android:name="org.vosk.service.download.DownloadModelService"
             android:foregroundServiceType="dataSync" />
     </application>
 </manifest>

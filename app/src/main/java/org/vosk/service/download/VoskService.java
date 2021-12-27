@@ -1,6 +1,6 @@
-package org.vosk.demo.api;
+package org.vosk.service.download;
 
-import org.vosk.demo.ui.model_list.ModelItem;
+import org.vosk.service.ui.model_list.ModelItem;
 
 import java.util.List;
 

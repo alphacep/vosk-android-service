@@ -1,7 +1,6 @@
-package org.vosk.demo.ui.model_list;
+package org.vosk.service.ui.model_list;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 
 public class DiffCallback extends DiffUtil.ItemCallback<ModelItem> {

@@ -1,13 +1,12 @@
-package org.vosk.demo.utils;
+package org.vosk.service.download;
 
-import static org.vosk.demo.DownloadModelService.MODEL_FILE_ROOT_PATH;
-import static org.vosk.demo.api.Download.CLEAR;
-import static org.vosk.demo.api.Download.COMPLETE;
+import static org.vosk.service.download.DownloadModelService.MODEL_FILE_ROOT_PATH;
+import static org.vosk.service.download.Download.CLEAR;
+import static org.vosk.service.download.Download.COMPLETE;
 
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.io.IOUtils;
 
-import org.vosk.demo.api.Download;
-import org.vosk.demo.ui.model_list.ModelListActivity;
+import org.vosk.service.ui.model_list.ModelListActivity;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
