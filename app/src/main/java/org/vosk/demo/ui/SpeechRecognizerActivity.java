@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,7 +32,6 @@ import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -71,7 +71,6 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
     private static final int MSG_RESULT_ERROR = 2;
     public static final Integer RecordAudioRequestCode = 1;
 
-    private EditText editText;
     private SharedPreferences sharedPreferences;
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -127,7 +126,7 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
     }
 
     void showError(String msg) {
-        editText.setText(msg);
+        Log.d(TAG, msg);
     }
 
     @Override
@@ -143,7 +142,6 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
             initModel();
         }
 
-        editText = findViewById(R.id.text);
 
         listener = new RecognitionListener() {
             @Override
@@ -151,7 +149,6 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
                 if (!s.contains("\"partial\" : \"\"")) {
                     try {
                         JSONObject json = new JSONObject(s);
-                        editText.setText(json.getString("partial"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -163,7 +160,6 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
                 try {
                     JSONObject json = new JSONObject(s);
                     String resultText = json.getString("text");
-                    editText.setText(resultText);
                     List<String> results = Collections.singletonList(resultText);
                     returnResults(results);
                 } catch (JSONException e) {
@@ -194,7 +190,7 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
 
             compositeDisposable.add(Single.fromCallable(() -> new Model(outputFile.getAbsolutePath()))
                     .doOnSuccess(model1 -> this.model = model1)
-                    .delay(1, TimeUnit.MILLISECONDS)
+                    .delay(1, TimeUnit.MICROSECONDS)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(model1 -> startSpeech(), Throwable::printStackTrace));
@@ -207,7 +203,13 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
                     Throwable::printStackTrace);
     }
 
+    public void startSpeechSound() {
+        MediaPlayer mp = MediaPlayer.create(this, R.raw.start_speech_effect);
+        mp.start();
+    }
+
     private void startSpeech() {
+        startSpeechSound();
         try {
             Recognizer rec = new Recognizer(model, 16000.0f);
             speechService = new SpeechService(rec, 16000.0f);
@@ -220,8 +222,6 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        editText.setText("");
-        editText.setHint(R.string.speaknow);
         Log.i(TAG, "onStart");
     }
 

@@ -3,7 +3,7 @@ package org.vosk.demo.api;
 public class Download {
 
     public final static int CLEAR = 200;
-    public final  static int STARTING = 201;
+    public final static int STARTING = 0;
     public final static int UNZIPPING = 202;
     public final static int COMPLETE = 203;
     public final static int RESTARTING = 204;

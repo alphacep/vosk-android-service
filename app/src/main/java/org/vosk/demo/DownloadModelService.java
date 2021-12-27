@@ -4,6 +4,7 @@ import static org.vosk.demo.api.Download.CLEAR;
 import static org.vosk.demo.api.Download.COMPLETE;
 import static org.vosk.demo.api.Download.UNZIPPING;
 import static org.vosk.demo.api.VoskClient.ServiceType.DOWNLOAD_MODEL;
+import static org.vosk.demo.utils.FileHelper.writeFile;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -24,27 +25,17 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.io.IOUtils;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import org.vosk.demo.api.Download;
 import org.vosk.demo.api.DownloadProgressListener;
 import org.vosk.demo.api.VoskClient;
 import org.vosk.demo.api.VoskService;
-import org.vosk.demo.ui.model_list.ModelItem;
 import org.vosk.demo.ui.model_list.ModelListActivity;
 import org.vosk.demo.utils.Error;
 import org.vosk.demo.utils.EventBus;
 import org.vosk.demo.utils.PreferenceConstants;
-import org.vosk.demo.utils.ZipHelper;
+import org.vosk.demo.utils.FileHelper;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -94,10 +85,9 @@ public class DownloadModelService extends Service {
                         File outputFile = new File(MODEL_FILE_ROOT_PATH, modelName + ".zip");
                         File destinationFile = new File(MODEL_FILE_ROOT_PATH, modelName);
 
-                        ZipHelper.unzipFIle(outputFile, destinationFile);
+                        FileHelper.unzipFIle(outputFile, destinationFile);
                         actualProgress = CLEAR;
                     } else if (download.getProgress() == COMPLETE) {
-                        addOfflineModel();
                         sharedPreferences.edit()
                                 .remove(PreferenceConstants.DOWNLOADING_FILE)
                                 .apply();
@@ -119,16 +109,6 @@ public class DownloadModelService extends Service {
         notificationManager.notify(DOWNLOAD_MODEL_NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    private void addOfflineModel() {
-        String offlineListJson = sharedPreferences.getString(PreferenceConstants.OFFLINE_LIST, "[]");
-        Gson gson = new Gson();
-        List<ModelItem> offlineModels = gson.fromJson(offlineListJson, new TypeToken<List<ModelItem>>() {
-        }.getType());
-        offlineModels.add(new ModelItem(modelName));
-        String offlineModelsJson = gson.toJson(offlineModels);
-        sharedPreferences.edit().putString(PreferenceConstants.OFFLINE_LIST, offlineModelsJson).apply();
-    }
-
     private DownloadProgressListener getListener() {
         return (bytesRead, contentLength, done) -> {
             Download download = new Download();
@@ -143,7 +123,7 @@ public class DownloadModelService extends Service {
 
     private void downloadModel(String modelName) {
         File outputFile = new File(MODEL_FILE_ROOT_PATH, modelName + ".zip");
-        ZipHelper.createDir(MODEL_FILE_ROOT_PATH);
+        FileHelper.createDir(MODEL_FILE_ROOT_PATH);
 
         compositeDisposable.add(service.downloadFile(outputFile.getName())
                 .subscribeOn(Schedulers.io())
@@ -152,14 +132,6 @@ public class DownloadModelService extends Service {
                 .subscribe(inputStream -> EventBus.getInstance().postDownloadStatus(new Download(UNZIPPING, modelName)),
                         error -> EventBus.getInstance().postErrorStatus(Error.CONNECTION)));
 
-    }
-
-    private static void writeFile(InputStream inputStream, File file) {
-        try (OutputStream outputStream = new FileOutputStream(file)) {
-            IOUtils.copy(inputStream, outputStream);
-        } catch (IOException e) {
-            EventBus.getInstance().postErrorStatus(Error.WRITE_STORAGE);
-        }
     }
 
     @Override

@@ -15,8 +15,10 @@ public class ModelItem {
     public ModelItem() {
     }
 
-    public ModelItem(String modelName) {
-        this.name = modelName;
+    public ModelItem(String lang_text, String name, String size_text) {
+        this.lang_text = lang_text;
+        this.name = name;
+        this.size_text = size_text;
     }
 
     public ModelItem(String lang, String lang_text, String md5, String name, boolean obsolete, long size, String size_text, String type, String url, String version) {

@@ -4,6 +4,6 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="colorBackground">#EEEEEE</color>
-    <color name="indicator_green">#81C784</color>
-    <color name="indicator_red">#E57373</color>
+    <color name="indicator_green">#44CD44</color>
+    <color name="indicator_gray">#646464</color>
 </resources>
