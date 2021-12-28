@@ -15,64 +15,43 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package org.vosk.service.ui;
 
-import static org.vosk.service.download.DownloadModelService.MODEL_FILE_ROOT_PATH;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.widget.Toast;
+
+import org.vosk.service.R;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.vosk.LibVosk;
-import org.vosk.LogLevel;
-import org.vosk.Model;
-import org.vosk.Recognizer;
-import org.vosk.android.RecognitionListener;
-import org.vosk.android.SpeechService;
-import org.vosk.android.StorageService;
-import org.vosk.service.R;
-import org.vosk.service.utils.PreferenceConstants;
-
-import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
+import java.util.Locale;
 
 public class SpeechRecognizerActivity extends AppCompatActivity {
     protected static final String TAG = SpeechRecognizerActivity.class.getSimpleName();
 
+    private SpeechRecognizer speechRecognizer;
+
     private static final String MSG = "MSG";
     private static final int MSG_TOAST = 1;
     private static final int MSG_RESULT_ERROR = 2;
-    public static final Integer RecordAudioRequestCode = 1;
-
-    private SharedPreferences sharedPreferences;
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     int PERMISSION_ALL = 1;
 
@@ -81,16 +60,12 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
-    //Vosk
-    private Model model;
-    private SpeechService speechService;
-    RecognitionListener listener;
-
     protected static class SimpleMessageHandler extends Handler {
         private final WeakReference<SpeechRecognizerActivity> mRef;
 
-        private SimpleMessageHandler(SpeechRecognizerActivity c) {
-            mRef = new WeakReference<>(c);
+        private SimpleMessageHandler(Looper looper, SpeechRecognizerActivity activity) {
+            super(looper);
+            mRef = new WeakReference<>(activity);
         }
 
         public void handleMessage(Message msg) {
@@ -112,11 +87,11 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
         }
     }
 
-    protected static Message createMessage(int type, String str) {
+    protected static Message createMessage(String str) {
         Bundle b = new Bundle();
         b.putString(MSG, str);
         Message msg = Message.obtain();
-        msg.what = type;
+        msg.what = SpeechRecognizerActivity.MSG_TOAST;
         msg.setData(b);
         return msg;
     }
@@ -133,107 +108,87 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.speech_recognizer_activity);
-        LibVosk.setLogLevel(LogLevel.INFO);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
-        } else {
-            initModel();
         }
 
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
 
-        listener = new RecognitionListener() {
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
-            public void onPartialResult(String s) {
-                if (!s.contains("\"partial\" : \"\"")) {
-                    try {
-                        JSONObject json = new JSONObject(s);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
+            public void onReadyForSpeech(Bundle bundle) {
+
             }
 
             @Override
-            public void onResult(String s) {
-                try {
-                    JSONObject json = new JSONObject(s);
-                    String resultText = json.getString("text");
-                    List<String> results = Collections.singletonList(resultText);
-                    returnResults(results);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            public void onBeginningOfSpeech() {
             }
 
             @Override
-            public void onFinalResult(String s) {
-                speechService.stop();
+            public void onRmsChanged(float v) {
+
             }
 
             @Override
-            public void onError(Exception e) {
+            public void onBufferReceived(byte[] bytes) {
+
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+                speechRecognizer.stopListening();
+            }
+
+            @Override
+            public void onError(int i) {
                 showError();
             }
 
             @Override
-            public void onTimeout() {
-
+            public void onResults(Bundle bundle) {
+                Log.i(TAG, "onResults");
+                ArrayList<String> results = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                Log.i(TAG, results.get(0));
+                returnResults(results);
             }
-        };
-    }
 
-    private void initModel() {
-        if (sharedPreferences.contains(PreferenceConstants.ACTIVE_MODEL)) {
-            File outputFile = new File(MODEL_FILE_ROOT_PATH, sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, "") + "/" + sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, ""));
+            @Override
+            public void onPartialResults(Bundle bundle) {
+                Log.i(TAG, "onPartialResults");
+                ArrayList<String> data = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                Log.i(TAG, data.get(0));
+            }
 
-            compositeDisposable.add(Single.fromCallable(() -> new Model(outputFile.getAbsolutePath()))
-                    .doOnSuccess(model1 -> this.model = model1)
-                    .delay(1, TimeUnit.MICROSECONDS)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(model1 -> startSpeech(), Throwable::printStackTrace));
-        } else
-            StorageService.unpack(this, "model-en-us", "model",
-                    (model) -> {
-                        this.model = model;
-                        startSpeech();
-                    },
-                    Throwable::printStackTrace);
-    }
-
-    public void startSpeechSound() {
-        MediaPlayer mp = MediaPlayer.create(this, R.raw.start_speech_effect);
-        mp.start();
-    }
-
-    private void startSpeech() {
-        startSpeechSound();
-        try {
-            Recognizer rec = new Recognizer(model, 16000.0f);
-            speechService = new SpeechService(rec, 16000.0f);
-            speechService.startListening(listener);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onEvent(int i, Bundle bundle) {
+                Log.d(TAG, bundle.toString());
+            }
+        });
     }
 
     @Override
     public void onStart() {
         super.onStart();
         Log.i(TAG, "onStart");
+        final Intent speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        speechRecognizer.startListening(speechRecognizerIntent);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "onDestroy");
-        if (speechService != null) {
-            speechService.stop();
-            speechService.shutdown();
-        }
-        compositeDisposable.clear();
+        speechRecognizer.destroy();
+    }
+
+
+    public void startSpeechSound() {
+        MediaPlayer mp = MediaPlayer.create(this, R.raw.start_speech_effect);
+        mp.start();
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -259,7 +214,7 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
     }
 
     private void returnResults(List<String> results) {
-        Handler handler = new SimpleMessageHandler(this);
+        Handler handler = new SimpleMessageHandler(Looper.getMainLooper(), this);
 
         Intent incomingIntent = getIntent();
         Log.d(TAG, incomingIntent.toString());
@@ -271,7 +226,7 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
         PendingIntent pendingIntent = getPendingIntent(extras);
         if (pendingIntent == null) {
             Log.d(TAG, "No pending intent, setting result intent.");
-            setResultIntent(handler, results);
+            setResultIntent(results);
         } else {
             Log.d(TAG, pendingIntent.toString());
 
@@ -283,13 +238,13 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.putExtras(bundle);
             handler.sendMessage(
-                    createMessage(MSG_TOAST, String.format(getString(R.string.recognized), results.get(0))));
+                    createMessage(String.format(getString(R.string.recognized), results.get(0))));
             try {
                 Log.d(TAG, "Sending result via pendingIntent");
                 pendingIntent.send(this, AppCompatActivity.RESULT_OK, intent);
             } catch (PendingIntent.CanceledException e) {
                 Log.e(TAG, e.getMessage());
-                handler.sendMessage(createMessage(MSG_TOAST, e.getMessage()));
+                handler.sendMessage(createMessage(e.getMessage()));
             }
         }
         finish();
@@ -299,7 +254,7 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
         toast("Error loading recognizer");
     }
 
-    private void setResultIntent(final Handler handler, List<String> matches) {
+    private void setResultIntent(List<String> matches) {
         Intent intent = new Intent();
         intent.putStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS, new ArrayList<>(matches));
         setResult(Activity.RESULT_OK, intent);

@@ -1,4 +1,4 @@
-package org.vosk.service.ui.model_list;
+package org.vosk.service.ui.selector;
 
 public class ModelItem {
     private String lang;

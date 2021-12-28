@@ -2,7 +2,7 @@ package org.vosk.service.download;
 
 import android.net.NetworkInfo;
 
-import org.vosk.service.ui.model_list.ModelItem;
+import org.vosk.service.ui.selector.ModelItem;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;

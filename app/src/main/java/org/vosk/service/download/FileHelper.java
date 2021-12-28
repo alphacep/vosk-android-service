@@ -6,7 +6,7 @@ import static org.vosk.service.download.Download.COMPLETE;
 
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.io.IOUtils;
 
-import org.vosk.service.ui.model_list.ModelListActivity;
+import org.vosk.service.ui.selector.ModelListActivity;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

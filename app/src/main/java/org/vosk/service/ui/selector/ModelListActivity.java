@@ -1,11 +1,11 @@
-package org.vosk.service.ui.model_list;
+package org.vosk.service.ui.selector;
 
 import static org.vosk.service.download.DownloadModelService.MODEL_FILE_ROOT_PATH;
 import static org.vosk.service.download.Download.CLEAR;
 import static org.vosk.service.download.Download.COMPLETE;
 import static org.vosk.service.download.Download.RESTARTING;
 import static org.vosk.service.download.Download.STARTING;
-import static org.vosk.service.download.VoskClient.ServiceType.DOWNLOAD_MODEL_LIST;
+import static org.vosk.service.download.VoskModelStorageClient.ServiceType.DOWNLOAD_MODEL_LIST;
 import static org.vosk.service.utils.Tools.isServiceRunning;
 
 import android.app.Dialog;
@@ -32,8 +32,8 @@ import com.google.gson.reflect.TypeToken;
 
 import org.vosk.service.download.DownloadModelService;
 import org.vosk.service.R;
-import org.vosk.service.download.VoskClient;
-import org.vosk.service.download.VoskService;
+import org.vosk.service.download.VoskModelStorageClient;
+import org.vosk.service.download.VoskModelStorage;
 import org.vosk.service.download.Error;
 import org.vosk.service.download.EventBus;
 import org.vosk.service.utils.PreferenceConstants;
@@ -51,7 +51,7 @@ public class ModelListActivity extends AppCompatActivity {
 
     private final EventBus eventBus = EventBus.getInstance();
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private final VoskService service = VoskClient.getClient(null, DOWNLOAD_MODEL_LIST);
+    private final VoskModelStorage service = VoskModelStorageClient.getClient(null, DOWNLOAD_MODEL_LIST);
     private final Gson gson = new Gson();
 
     private ModelListAdapter modelListAdapter;

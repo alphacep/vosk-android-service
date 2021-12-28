@@ -3,7 +3,7 @@ package org.vosk.service.download;
 import static org.vosk.service.download.Download.CLEAR;
 import static org.vosk.service.download.Download.COMPLETE;
 import static org.vosk.service.download.Download.UNZIPPING;
-import static org.vosk.service.download.VoskClient.ServiceType.DOWNLOAD_MODEL;
+import static org.vosk.service.download.VoskModelStorageClient.ServiceType.DOWNLOAD_MODEL;
 import static org.vosk.service.download.FileHelper.writeFile;
 
 import android.app.NotificationChannel;
@@ -26,7 +26,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import org.vosk.service.R;
-import org.vosk.service.ui.model_list.ModelListActivity;
+import org.vosk.service.ui.selector.ModelListActivity;
 import org.vosk.service.utils.PreferenceConstants;
 
 import java.io.File;
@@ -45,7 +45,7 @@ public class DownloadModelService extends Service {
     public static final int DOWNLOAD_MODEL_MAX_PROGRESS = 100;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private final VoskService service = VoskClient.getClient(getListener(), DOWNLOAD_MODEL);
+    private final VoskModelStorage service = VoskModelStorageClient.getClient(getListener(), DOWNLOAD_MODEL);
     private SharedPreferences sharedPreferences;
     private final EventBus eventBus = EventBus.getInstance();
     private NotificationManager notificationManager;

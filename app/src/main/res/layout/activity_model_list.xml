@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.model_list.ModelListActivity">
+    tools:context=".ui.selector.ModelListActivity">
 
     <ProgressBar
         android:id="@+id/progress_circular"

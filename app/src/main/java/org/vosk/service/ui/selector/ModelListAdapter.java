@@ -1,6 +1,6 @@
-package org.vosk.service.ui.model_list;
+package org.vosk.service.ui.selector;
 
-import static org.vosk.service.ui.model_list.ModelListActivity.progress;
+import static org.vosk.service.ui.selector.ModelListActivity.progress;
 
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;

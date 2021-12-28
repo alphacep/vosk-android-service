@@ -7,14 +7,14 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class VoskClient {
+public class VoskModelStorageClient {
 
     private static final String TAG = "DownloadAPI";
     private static final int DEFAULT_TIMEOUT = 15;
     public static Retrofit retrofit;
     private static final String BASE_URL = "https://alphacephei.com/vosk/models/";
 
-    public static VoskService getClient(DownloadProgressListener listener, ServiceType serviceType) {
+    public static VoskModelStorage getClient(DownloadProgressListener listener, ServiceType serviceType) {
 
         DownloadProgressInterceptor interceptor = new DownloadProgressInterceptor(listener);
 
@@ -34,7 +34,7 @@ public class VoskClient {
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client)
                 .build();
-        return retrofit.create(VoskService.class);
+        return retrofit.create(VoskModelStorage.class);
     }
 
     public enum ServiceType {

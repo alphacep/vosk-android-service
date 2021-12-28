@@ -36,5 +36,6 @@
     <string name="delete_model_dialog_title">Delete model</string>
     <string name="delete_model_dialog_message">Are you sure you want to delete the selected model?</string>
     <string name="model_delete">Model deleted</string>
+    <string name="vosk_recognition_service">Vosk Speech Recognition Service</string>
 
 </resources>

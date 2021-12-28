@@ -1,4 +1,4 @@
-package org.vosk.service.ui.model_list;
+package org.vosk.service.ui.selector;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;

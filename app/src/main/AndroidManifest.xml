@@ -20,7 +20,7 @@
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true">
         <activity
-            android:name="org.vosk.service.ui.model_list.ModelListActivity"
+            android:name="org.vosk.service.ui.selector.ModelListActivity"
             android:exported="true"
             android:theme="@style/AppTheme">
             <intent-filter>
@@ -93,12 +93,31 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.vosk.service.ui.VoskActivity"
+            android:name="org.vosk.service.ui.VoskModelsActivity"
             android:exported="true"
             android:label="@string/app_name" />
 
         <service
             android:name="org.vosk.service.download.DownloadModelService"
             android:foregroundServiceType="dataSync" />
+
+        <service
+            android:name=".VoskRecognitionService"
+            android:icon="@drawable/ic_service_trigger"
+            android:label="@string/vosk_recognition_service"
+            android:permission="android.permission.RECORD_AUDIO">
+            <intent-filter>
+
+                <!-- The constant value is defined at RecognitionService.SERVICE_INTERFACE. -->
+                <action android:name="android.speech.RecognitionService" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.speech"
+                android:resource="@xml/recognition_service" />
+        </service>
+
     </application>
 </manifest>
