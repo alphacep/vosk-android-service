@@ -38,7 +38,7 @@ import okhttp3.ResponseBody;
 
 public class DownloadModelService extends Service {
 
-    public static final File MODEL_FILE_ROOT_PATH = new File(Environment.getExternalStorageDirectory(), "models");
+    public static File MODEL_FILE_ROOT_PATH ;
     public static final String DOWNLOAD_MODEL_CHANNEL_ID_VALUE = "download_model_channel_id";
     public static final String DOWNLOAD_MODEL_CHANNEL_NAME = "Vosk model downloader";
     public static final int DOWNLOAD_MODEL_NOTIFICATION_ID = 1;
@@ -64,6 +64,7 @@ public class DownloadModelService extends Service {
     public void onCreate() {
         super.onCreate();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        MODEL_FILE_ROOT_PATH = new File(this.getFilesDir(), "models");
         modelName = sharedPreferences.getString(PreferenceConstants.DOWNLOADING_FILE, "");
         downloadModel(modelName);
         observeEvents();
