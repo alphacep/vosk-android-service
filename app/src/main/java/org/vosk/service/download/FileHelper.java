@@ -1,12 +1,14 @@
 package org.vosk.service.download;
 
-import static org.vosk.service.download.DownloadModelService.MODEL_FILE_ROOT_PATH;
 import static org.vosk.service.download.Download.CLEAR;
 import static org.vosk.service.download.Download.COMPLETE;
+
+import android.content.Context;
 
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.io.IOUtils;
 
 import org.vosk.service.ui.selector.ModelListActivity;
+import org.vosk.service.utils.Tools;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -21,7 +23,7 @@ import java.util.zip.ZipFile;
 
 public class FileHelper {
 
-    public static void unzipFIle(File zipFilePath, File unzipAtLocation) {
+    public static void unzipFIle(Context context,File zipFilePath, File unzipAtLocation) {
 
         //noinspection ResultOfMethodCallIgnored
         unzipAtLocation.mkdir();
@@ -32,7 +34,7 @@ public class FileHelper {
                 unzipEntry(zipfile, entry, unzipAtLocation);
             }
             EventBus.getInstance().postDownloadStatus(new Download(COMPLETE));
-            FileHelper.deleteFileOrDirectory(new File(MODEL_FILE_ROOT_PATH, unzipAtLocation.getName() + ".zip"));
+            FileHelper.deleteFileOrDirectory(new File(Tools.getModelFileRootPath(context), unzipAtLocation.getName() + ".zip"));
         } catch (IOException e) {
             ModelListActivity.progress = CLEAR;
             EventBus.getInstance().postErrorStatus(Error.CONNECTION);

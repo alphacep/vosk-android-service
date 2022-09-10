@@ -3,8 +3,8 @@ package org.vosk.service.download;
 import static org.vosk.service.download.Download.CLEAR;
 import static org.vosk.service.download.Download.COMPLETE;
 import static org.vosk.service.download.Download.UNZIPPING;
-import static org.vosk.service.download.VoskModelStorageClient.ServiceType.DOWNLOAD_MODEL;
 import static org.vosk.service.download.FileHelper.writeFile;
+import static org.vosk.service.download.VoskModelStorageClient.ServiceType.DOWNLOAD_MODEL;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -28,6 +28,7 @@ import androidx.core.app.NotificationCompat;
 import org.vosk.service.R;
 import org.vosk.service.ui.selector.ModelListActivity;
 import org.vosk.service.utils.PreferenceConstants;
+import org.vosk.service.utils.Tools;
 
 import java.io.File;
 
@@ -38,12 +39,12 @@ import okhttp3.ResponseBody;
 
 public class DownloadModelService extends Service {
 
-    public static final File MODEL_FILE_ROOT_PATH = new File(Environment.getExternalStorageDirectory(), "models");
     public static final String DOWNLOAD_MODEL_CHANNEL_ID_VALUE = "download_model_channel_id";
     public static final String DOWNLOAD_MODEL_CHANNEL_NAME = "Vosk model downloader";
     public static final int DOWNLOAD_MODEL_NOTIFICATION_ID = 1;
     public static final int DOWNLOAD_MODEL_MAX_PROGRESS = 100;
 
+    private static File MODEL_FILE_ROOT_PATH ;
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private final VoskModelStorage service = VoskModelStorageClient.getClient(getListener(), DOWNLOAD_MODEL);
     private SharedPreferences sharedPreferences;
@@ -64,6 +65,7 @@ public class DownloadModelService extends Service {
     public void onCreate() {
         super.onCreate();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        MODEL_FILE_ROOT_PATH = Tools.getModelFileRootPath(this);
         modelName = sharedPreferences.getString(PreferenceConstants.DOWNLOADING_FILE, "");
         downloadModel(modelName);
         observeEvents();
@@ -79,7 +81,7 @@ public class DownloadModelService extends Service {
                         File outputFile = new File(MODEL_FILE_ROOT_PATH, modelName + ".zip");
                         File destinationFile = new File(MODEL_FILE_ROOT_PATH, modelName);
 
-                        FileHelper.unzipFIle(outputFile, destinationFile);
+                        FileHelper.unzipFIle(this, outputFile, destinationFile);
                         actualProgress = CLEAR;
                     } else if (download.getProgress() == COMPLETE) {
                         sharedPreferences.edit()
@@ -100,6 +102,7 @@ public class DownloadModelService extends Service {
 
     private void updateNotificationProgress() {
         notificationBuilder.setProgress(DOWNLOAD_MODEL_MAX_PROGRESS, actualProgress, false);
+        notificationBuilder.setSilent(true);
         notificationManager.notify(DOWNLOAD_MODEL_NOTIFICATION_ID, notificationBuilder.build());
     }
 
@@ -137,7 +140,12 @@ public class DownloadModelService extends Service {
     private void registerNotification() {
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(this, ModelListActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        PendingIntent pendingIntent;
+        int flags = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            flags = PendingIntent.FLAG_MUTABLE;
+        }
+        pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, flags);
         notificationBuilder = getNotification(notificationManager, pendingIntent);
 
         startForeground(DOWNLOAD_MODEL_NOTIFICATION_ID, notificationBuilder.build());

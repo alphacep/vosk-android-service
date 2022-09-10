@@ -1,6 +1,5 @@
 package org.vosk.service.ui.selector;
 
-import static org.vosk.service.download.DownloadModelService.MODEL_FILE_ROOT_PATH;
 import static org.vosk.service.download.Download.CLEAR;
 import static org.vosk.service.download.Download.COMPLETE;
 import static org.vosk.service.download.Download.RESTARTING;
@@ -38,6 +37,7 @@ import org.vosk.service.download.Error;
 import org.vosk.service.download.EventBus;
 import org.vosk.service.utils.PreferenceConstants;
 import org.vosk.service.download.FileHelper;
+import org.vosk.service.utils.Tools;
 
 import java.io.File;
 import java.util.List;
@@ -212,7 +212,7 @@ public class ModelListActivity extends AppCompatActivity {
     }
 
     private void deleteOfflineModel(ModelItem modelItem) {
-        FileHelper.deleteFileOrDirectory(new File(MODEL_FILE_ROOT_PATH, modelItem.getName()));
+        FileHelper.deleteFileOrDirectory(new File(Tools.getModelFileRootPath(this), modelItem.getName()));
         offlineModelList.stream()
                 .filter(it -> it.getName().equals(modelItem.getName())).findFirst()
                 .ifPresent(item -> offlineModelList.remove(item));
