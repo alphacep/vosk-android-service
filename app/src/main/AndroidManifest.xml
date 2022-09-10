@@ -102,7 +102,8 @@
             android:name=".VoskRecognitionService"
             android:icon="@drawable/ic_service_trigger"
             android:label="@string/vosk_recognition_service"
-            android:permission="android.permission.RECORD_AUDIO">
+            android:permission="android.permission.RECORD_AUDIO"
+            android:exported="true">
             <intent-filter>
 
                 <!-- The constant value is defined at RecognitionService.SERVICE_INTERFACE. -->
