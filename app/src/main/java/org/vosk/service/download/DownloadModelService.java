@@ -28,6 +28,7 @@ import androidx.core.app.NotificationCompat;
 import org.vosk.service.R;
 import org.vosk.service.ui.selector.ModelListActivity;
 import org.vosk.service.utils.PreferenceConstants;
+import org.vosk.service.utils.Tools;
 
 import java.io.File;
 
@@ -38,12 +39,12 @@ import okhttp3.ResponseBody;
 
 public class DownloadModelService extends Service {
 
-    public static File MODEL_FILE_ROOT_PATH ;
     public static final String DOWNLOAD_MODEL_CHANNEL_ID_VALUE = "download_model_channel_id";
     public static final String DOWNLOAD_MODEL_CHANNEL_NAME = "Vosk model downloader";
     public static final int DOWNLOAD_MODEL_NOTIFICATION_ID = 1;
     public static final int DOWNLOAD_MODEL_MAX_PROGRESS = 100;
 
+    private static File MODEL_FILE_ROOT_PATH ;
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private final VoskModelStorage service = VoskModelStorageClient.getClient(getListener(), DOWNLOAD_MODEL);
     private SharedPreferences sharedPreferences;
@@ -64,7 +65,7 @@ public class DownloadModelService extends Service {
     public void onCreate() {
         super.onCreate();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        MODEL_FILE_ROOT_PATH = new File(this.getFilesDir(), "models");
+        MODEL_FILE_ROOT_PATH = Tools.getModelFileRootPath(this);
         modelName = sharedPreferences.getString(PreferenceConstants.DOWNLOADING_FILE, "");
         downloadModel(modelName);
         observeEvents();
@@ -80,7 +81,7 @@ public class DownloadModelService extends Service {
                         File outputFile = new File(MODEL_FILE_ROOT_PATH, modelName + ".zip");
                         File destinationFile = new File(MODEL_FILE_ROOT_PATH, modelName);
 
-                        FileHelper.unzipFIle(outputFile, destinationFile);
+                        FileHelper.unzipFIle(this, outputFile, destinationFile);
                         actualProgress = CLEAR;
                     } else if (download.getProgress() == COMPLETE) {
                         sharedPreferences.edit()

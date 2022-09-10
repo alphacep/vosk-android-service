@@ -32,6 +32,7 @@ import org.vosk.Recognizer;
 import org.vosk.android.RecognitionListener;
 import org.vosk.android.SpeechService;
 import org.vosk.service.utils.PreferenceConstants;
+import org.vosk.service.utils.Tools;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +45,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static org.vosk.service.download.DownloadModelService.MODEL_FILE_ROOT_PATH;
 
 public class VoskRecognitionService extends RecognitionService implements RecognitionListener {
     private final static String TAG = VoskRecognitionService.class.getSimpleName();
@@ -81,7 +80,8 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
             if (sharedPreferences.contains(PreferenceConstants.ACTIVE_MODEL)) {
-                File outputFile = new File(MODEL_FILE_ROOT_PATH, sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, "") + "/" + sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, ""));
+                File outputFile = new File(Tools.getModelFileRootPath(this),
+                        sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, "") + "/" + sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, ""));
 
                 compositeDisposable.add(Single.fromCallable(() -> new Model(outputFile.getAbsolutePath()))
                         .doOnSuccess(model_ -> this.model = model_)
