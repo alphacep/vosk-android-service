@@ -1,5 +1,7 @@
 package org.vosk.service.download;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 
 import okhttp3.MediaType;
@@ -32,6 +34,7 @@ public class DownloadProgressResponseBody extends ResponseBody {
         return responseBody.contentLength();
     }
 
+    @NonNull
     @Override
     public BufferedSource source() {
         if (bufferedSource == null) {
