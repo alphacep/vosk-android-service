@@ -10,7 +10,7 @@ repositories {
 android {
     compileSdkVersion 32
     defaultConfig {
-        applicationId "org.vosk.demo"
+        applicationId "org.vosk.service"
         minSdkVersion 24
         targetSdkVersion 32
         versionCode 1
