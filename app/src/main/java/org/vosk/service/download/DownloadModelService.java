@@ -3,8 +3,8 @@ package org.vosk.service.download;
 import static org.vosk.service.download.Download.CLEAR;
 import static org.vosk.service.download.Download.COMPLETE;
 import static org.vosk.service.download.Download.UNZIPPING;
-import static org.vosk.service.download.VoskModelStorageClient.ServiceType.DOWNLOAD_MODEL;
 import static org.vosk.service.download.FileHelper.writeFile;
+import static org.vosk.service.download.VoskModelStorageClient.ServiceType.DOWNLOAD_MODEL;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -137,7 +137,12 @@ public class DownloadModelService extends Service {
     private void registerNotification() {
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(this, ModelListActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        PendingIntent pendingIntent;
+        int flags = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            flags = PendingIntent.FLAG_MUTABLE;
+        }
+        pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, flags);
         notificationBuilder = getNotification(notificationManager, pendingIntent);
 
         startForeground(DOWNLOAD_MODEL_NOTIFICATION_ID, notificationBuilder.build());
