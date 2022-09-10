@@ -101,6 +101,7 @@ public class DownloadModelService extends Service {
 
     private void updateNotificationProgress() {
         notificationBuilder.setProgress(DOWNLOAD_MODEL_MAX_PROGRESS, actualProgress, false);
+        notificationBuilder.setSilent(true);
         notificationManager.notify(DOWNLOAD_MODEL_NOTIFICATION_ID, notificationBuilder.build());
     }
 
