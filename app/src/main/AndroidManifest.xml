@@ -96,6 +96,7 @@
             android:name=".VoskRecognitionService"
             android:icon="@drawable/ic_service_trigger"
             android:label="@string/vosk_recognition_service"
+            android:foregroundServiceType="microphone"
             android:permission="android.permission.RECORD_AUDIO"
             android:exported="true">
             <intent-filter>
