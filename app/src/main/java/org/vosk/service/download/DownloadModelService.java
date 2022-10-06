@@ -158,7 +158,7 @@ public class DownloadModelService extends Service {
         }
         return new NotificationCompat.Builder(this, DOWNLOAD_MODEL_CHANNEL_ID_VALUE)
                 .setContentTitle(getString(R.string.download_model_service_notification_title))
-                .setSmallIcon(R.drawable.icon)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setAutoCancel(false)
                 .setProgress(DOWNLOAD_MODEL_MAX_PROGRESS, 0, false)
                 .setContentIntent(pendingIntent);
