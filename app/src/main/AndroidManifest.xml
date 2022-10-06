@@ -84,9 +84,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="org.vosk.service.ui.VoskModelsActivity"
-            android:exported="true" />
 
         <service
             android:name="org.vosk.service.download.DownloadModelService"
