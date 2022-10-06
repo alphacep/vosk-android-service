@@ -45,7 +45,7 @@ dependencies {
 	implementation("com.squareup.retrofit2:adapter-rxjava2:2.3.0")
 	implementation("com.alphacephei:vosk-android:0.3.32@aar")
 	implementation("net.java.dev.jna:jna:5.8.0@aar")
-	implementation("com.alphacephei:vosk-model-en:0.3.38")
+	//implementation("com.alphacephei:vosk-model-en:0.3.38")
 	implementation("com.google.firebase:firebase-crashlytics-buildtools:2.9.2")
 	implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 	implementation("com.github.pwittchen:reactivenetwork-rx2:0.12.3")
