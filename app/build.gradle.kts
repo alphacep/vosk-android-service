@@ -8,11 +8,11 @@ repositories {
 }
 
 android {
-	compileSdk = 32
+	compileSdk = 33
 	defaultConfig {
 		applicationId = "org.vosk.service"
 		minSdk = 24
-		targetSdk = 32
+		targetSdk = 33
 		versionCode = 1
 		versionName = "1.1"
 		ndk {
