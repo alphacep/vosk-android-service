@@ -91,11 +91,11 @@
 
         <service
             android:name=".VoskRecognitionService"
+            android:exported="true"
+            android:foregroundServiceType="microphone"
             android:icon="@drawable/ic_service_trigger"
             android:label="@string/vosk_recognition_service"
-            android:foregroundServiceType="microphone"
-            android:permission="android.permission.RECORD_AUDIO"
-            android:exported="true">
+            android:permission="android.permission.RECORD_AUDIO">
             <intent-filter>
 
                 <!-- The constant value is defined at RecognitionService.SERVICE_INTERFACE. -->
