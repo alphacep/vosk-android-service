@@ -58,32 +58,41 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
 
     @Override
     protected void onStartListening(Intent intent, Callback callback) {
+        Log.v(TAG, "onStartListening");
         mCallback = callback;
-        Log.i(TAG, "onStartListening");
         runRecognizerSetup();
     }
 
     @Override
     protected void onCancel(Callback callback) {
-        Log.i(TAG, "onCancel");
+        Log.v(TAG, "onCancel");
         results(new Bundle(), true);
     }
 
     @Override
     protected void onStopListening(Callback callback) {
-        Log.i(TAG, "onStopListening");
+        Log.v(TAG, "onStopListening");
         results(new Bundle(), true);
     }
 
     private void runRecognizerSetup() {
+        Log.v(TAG, "runRecognizerSetup");
         if (this.model == null) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
             if (sharedPreferences.contains(PreferenceConstants.ACTIVE_MODEL)) {
-                File outputFile = new File(Tools.getModelFileRootPath(this),
-                        sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, "") + "/" + sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, ""));
+                final File MODEL_FILE_ROOT_PATH = Tools.getModelFileRootPath(this);
+                final String ACTIVE_MODEL = sharedPreferences.getString(PreferenceConstants.ACTIVE_MODEL, "");
 
-                compositeDisposable.add(Single.fromCallable(() -> new Model(outputFile.getAbsolutePath()))
+                File outputFile = new File(
+                        MODEL_FILE_ROOT_PATH,
+                        ACTIVE_MODEL + "/" + ACTIVE_MODEL
+                );
+
+                final String outputPath = outputFile.getAbsolutePath();
+                Log.d(TAG, outputPath);
+
+                compositeDisposable.add(Single.fromCallable(() -> new Model(outputPath))
                         .doOnSuccess(model_ -> this.model = model_)
                         .delay(1, TimeUnit.MICROSECONDS)
                         .subscribeOn(Schedulers.io())
@@ -96,6 +105,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
     }
 
     private void startSpeech() {
+        Log.v(TAG, "startSpeech");
         setupRecognizer();
         this.readyForSpeech(new Bundle());
         beginningOfSpeech();
@@ -103,6 +113,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
 
     @Override
     public void onDestroy() {
+        Log.v(TAG, "onDestroy");
         super.onDestroy();
 
         if (speechService != null) {
@@ -112,6 +123,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
     }
 
     private void setupRecognizer() {
+        Log.v(TAG, "setupRecognizer");
         try {
             if (recognizer == null) {
                 Log.i(TAG, "Creating recognizer");
@@ -133,6 +145,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
     }
 
     private void readyForSpeech(Bundle bundle) {
+        Log.v(TAG, "readyForSpeech");
         try {
             mCallback.readyForSpeech(bundle);
         } catch (RemoteException e) {
@@ -141,6 +154,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
     }
 
     private void results(Bundle bundle, boolean isFinal) {
+        Log.v(TAG, "results");
         try {
             if (isFinal) {
                 speechService.cancel();
@@ -154,6 +168,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
     }
 
     private Bundle createResultsBundle(String hypothesis) {
+        Log.v(TAG, "createResultsBundle");
         ArrayList<String> hypotheses = new ArrayList<>();
         hypotheses.add(hypothesis);
         Bundle bundle = new Bundle();
@@ -162,6 +177,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
     }
 
     private void beginningOfSpeech() {
+        Log.v(TAG, "beginningOfSpeech");
         try {
             mCallback.beginningOfSpeech();
         } catch (RemoteException e) {
@@ -170,6 +186,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
     }
 
     private void error(int errorCode) {
+        Log.v(TAG, "error");
         if (speechService != null) {
             speechService.cancel();
         }
@@ -180,10 +197,12 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
         }
     }
 
-    Type mapType = new TypeToken<Map<String, String>>() {}.getType();
+    Type mapType = new TypeToken<Map<String, String>>() {
+    }.getType();
 
     @Override
     public void onResult(String hypothesis) {
+        Log.v(TAG, "onResult");
         if (hypothesis != null) {
             Log.i(TAG, hypothesis);
             Gson gson = new Gson();
@@ -195,6 +214,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
 
     @Override
     public void onFinalResult(String hypothesis) {
+        Log.v(TAG, "onFinalResult");
         if (hypothesis != null) {
             Log.i(TAG, hypothesis);
             Gson gson = new Gson();
@@ -206,6 +226,7 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
 
     @Override
     public void onPartialResult(String hypothesis) {
+        Log.v(TAG, "onPartialResult");
         if (hypothesis != null) {
             Log.i(TAG, hypothesis);
             Gson gson = new Gson();
@@ -217,12 +238,14 @@ public class VoskRecognitionService extends RecognitionService implements Recogn
 
     @Override
     public void onError(Exception e) {
+        Log.v(TAG, "onError");
         Log.e(TAG, e.getMessage());
         error(android.speech.SpeechRecognizer.ERROR_CLIENT);
     }
 
     @Override
     public void onTimeout() {
+        Log.v(TAG, "onTimeout");
         speechService.cancel();
         speechService.startListening(this);
     }

@@ -5,8 +5,7 @@ import static org.vosk.service.download.Download.COMPLETE;
 
 import android.content.Context;
 
-import com.google.firebase.crashlytics.buildtools.reloc.org.apache.commons.io.IOUtils;
-
+import org.apache.commons.io.IOUtils;
 import org.vosk.service.ui.selector.ModelListActivity;
 import org.vosk.service.utils.Tools;
 
