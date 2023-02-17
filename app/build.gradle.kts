@@ -2,11 +2,6 @@ plugins {
     id("com.android.application")
 }
 
-repositories {
-    google()
-    maven("https://alphacephei.com/maven/")
-}
-
 android {
     compileSdk = 33
     defaultConfig {
@@ -42,7 +37,7 @@ android {
 }
 
 dependencies {
-    implementation("com.alphacephei:vosk-android:0.3.46@aar")
+    implementation("com.alphacephei:vosk-api-kotlin-android:0.4.0-alpha0@aar")
     implementation("net.java.dev.jna:jna:5.13.0@aar")
     implementation("androidx.appcompat:appcompat:1.5.1")
     implementation("com.google.code.gson:gson:2.9.0")

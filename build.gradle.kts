@@ -14,5 +14,7 @@ allprojects {
     repositories {
         mavenCentral()
         google()
+        maven("https://alphacephei.com/maven/")
+        mavenLocal()
     }
 }
