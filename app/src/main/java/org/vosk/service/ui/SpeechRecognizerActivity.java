@@ -104,14 +104,18 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
         Log.d(TAG, msg);
     }
 
+    void setupRecognizer() {
+        final Intent speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toString().replace("_","-"));
+        speechRecognizer.startListening(speechRecognizerIntent);
+    }
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.speech_recognizer_activity);
-
-        if (!hasPermissions(this, PERMISSIONS)) {
-            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
-        }
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
 
@@ -171,11 +175,13 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         Log.i(TAG, "onStart");
-        final Intent speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toString().replace("_","-"));
-        speechRecognizer.startListening(speechRecognizerIntent);
+
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+        }
+        else {
+            setupRecognizer();
+        }
     }
 
     @Override
@@ -211,6 +217,7 @@ public class SpeechRecognizerActivity extends AppCompatActivity {
                 finish();
             }
         }
+        setupRecognizer();
     }
 
     private void returnResults(List<String> results) {
